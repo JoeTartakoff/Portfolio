@@ -1,0 +1,222 @@
+:root {
+  --bg: #ffffff;
+  --fg: #111111;
+  --muted: #6b7280;
+  --faint: #9ca3af;
+  --line: #e2e2e5;
+  --card: #f5f5f7;
+  --max: 1080px;
+  --radius: 16px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --serif: Georgia, "Times New Roman", serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-snap-type: y mandatory;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+    "Pretendard", "Segoe UI", Roboto, sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; width: 100%; }
+
+/* ── reveal ── */
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s var(--ease), transform 0.6s var(--ease); }
+.reveal.in { opacity: 1; transform: none; }
+.reveal.d1 { transition-delay: 0.08s; }
+.reveal.d2 { transition-delay: 0.16s; }
+@media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } }
+
+/* ── image placeholder ── */
+.ph {
+  display: flex; align-items: center; justify-content: center;
+  background: var(--card); border: 1px dashed #d1d5db; border-radius: var(--radius);
+  color: var(--faint); font-size: 12px; text-align: center; overflow: hidden;
+}
+.ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* actual photo whose own aspect ratio should stay intact inside the box,
+   letterboxed (empty space added on the sides) instead of cropped */
+.ph--fit { border: none; }
+.ph--fit img { object-fit: contain; }
+
+/* ── top nav (fixed, persists over every slide) ── */
+.topnav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 60; height: 60px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: saturate(180%) blur(16px);
+  -webkit-backdrop-filter: saturate(180%) blur(16px);
+  border-bottom: 1px solid var(--line);
+}
+.topnav-inner {
+  max-width: var(--max); margin: 0 auto; padding: 0 24px; height: 100%;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.topnav .brand { font-weight: 800; font-size: 15px; letter-spacing: -0.01em; color: var(--fg); text-decoration: none; }
+.topnav ul { list-style: none; display: flex; align-items: center; gap: 28px; }
+.topnav a { color: var(--muted); text-decoration: none; font-size: 13.5px; transition: color 0.2s; }
+.topnav a:hover { color: var(--fg); }
+.topnav a.active { color: var(--fg); font-weight: 700; }
+.topnav a.pill {
+  color: #fff; background: var(--fg); padding: 9px 18px; border-radius: 999px;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.topnav a.pill:hover { opacity: 0.85; color: #fff; transform: translateY(-1px); }
+.topnav a.pill.active { color: #fff; }
+
+/* ── slide shell ── */
+.slide {
+  min-height: 100vh; min-height: 100svh;
+  scroll-snap-align: start; scroll-snap-stop: always;
+  display: flex; flex-direction: column; justify-content: center;
+  padding-top: 88px; padding-bottom: 48px;
+  border-top: 1px solid var(--line);
+}
+.sec-head { margin-bottom: 28px; }
+.sec-head .kicker { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
+.sec-head h2 { font-size: clamp(24px, 4vw, 34px); font-weight: 800; letter-spacing: -0.03em; margin-top: 6px; }
+.sec-head .caption { font-family: var(--serif); font-style: italic; color: var(--muted); font-size: 14px; margin-top: 10px; max-width: 46ch; }
+
+/* ── about slide ── */
+.hero-grid { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 36px; align-items: center; }
+.hero .ph { aspect-ratio: 4/5; max-height: 46vh; }
+.hero .eyebrow { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); }
+.hero h1 { font-size: clamp(30px, 4.6vw, 44px); font-weight: 800; letter-spacing: -0.03em; margin-top: 8px; }
+.hero .role { margin-top: 6px; color: var(--muted); font-size: 14.5px; }
+.hero .tagline { font-family: var(--serif); font-style: italic; font-size: clamp(15px, 2vw, 18px); margin-top: 14px; max-width: 34ch; }
+.hero .bio { margin-top: 14px; color: var(--muted); font-size: 14.5px; max-width: 52ch; }
+.cta-row { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px; }
+.cta-row a {
+  color: var(--fg); text-decoration: none; font-size: 13.5px;
+  border: 1px solid var(--line); padding: 10px 18px; border-radius: 999px;
+  transition: border-color 0.2s var(--ease), background 0.2s var(--ease), transform 0.2s var(--ease);
+}
+.cta-row a.primary { background: var(--fg); color: #fff; border-color: var(--fg); }
+.cta-row a:hover { transform: translateY(-2px); }
+.cta-row a:not(.primary):hover { border-color: var(--fg); background: var(--card); }
+
+.traits { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 32px; }
+.traits .item { padding: 16px 18px; background: var(--card); border-radius: var(--radius); }
+.traits .label { font-size: 11px; color: var(--faint); }
+.traits h3 { font-size: 15px; margin: 4px 0 6px; }
+.traits p { color: var(--muted); font-size: 12.5px; }
+
+.facts { margin-top: 28px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; padding-top: 22px; border-top: 1px solid var(--line); }
+.facts h4 { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); margin-bottom: 8px; }
+.facts .line { font-size: 12.5px; color: var(--muted); }
+.facts .line + .line { margin-top: 3px; }
+
+/* ── skills slide: edge-to-edge peek carousel ── */
+/* .skill-bleed lives outside any .wrap-constrained element (see skills.html),
+   so it's naturally full-width — no vw/negative-margin breakout hack needed. */
+.skill-bleed {
+  width: 100%; margin-top: 8px;
+}
+.skill-track {
+  /* same inset .wrap uses to align content: 24px once viewport <= --max,
+     otherwise 24px past the centered --max column's edge — so the first
+     card lines up with the Projects cards and the section heading. */
+  --gutter: calc((100vw - min(100vw, var(--max))) / 2 + 24px);
+  display: flex; gap: 20px; overflow-x: auto;
+  padding: 0 var(--gutter);
+  scroll-padding-left: var(--gutter);
+  scroll-padding-right: var(--gutter);
+  scroll-snap-type: x mandatory; scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch; scrollbar-width: none;
+}
+.skill-track::-webkit-scrollbar { display: none; }
+/* scroll-padding tells the browser's mandatory scroll-snap where the "start"
+   really is, so it stops auto-scrolling past our own container padding to
+   reach the first snap-aligned card (which otherwise hides the gutter). */
+.skill-card {
+  flex: 0 0 clamp(260px, 46vw, 480px); scroll-snap-align: start; min-width: 0;
+  border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden;
+}
+.skill-media { position: relative; }
+.skill-card .ph { aspect-ratio: 4/3; margin: 0; border-radius: 0; border: none; }
+
+/* ── mini in-card photo carousel (arrow-driven, no scroll-snap) ── */
+.mini-carousel { position: relative; aspect-ratio: 4/3; overflow: hidden; background: var(--card); }
+.mini-track { display: flex; width: 100%; height: 100%; transition: transform 0.35s var(--ease); }
+.mini-track img { flex: 0 0 100%; width: 100%; height: 100%; object-fit: contain; display: block; }
+.mini-nav {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
+  width: 30px; height: 30px; border-radius: 50%; border: none;
+  background: rgba(255, 255, 255, 0.85); color: var(--fg); font-size: 16px; line-height: 1;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; padding-bottom: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: background 0.2s;
+}
+.mini-nav:hover { background: #fff; }
+.mini-nav.prev { left: 10px; }
+.mini-nav.next { right: 10px; }
+.tag-pill {
+  position: absolute; left: 14px; bottom: 14px; z-index: 2;
+  background: rgba(10, 10, 10, 0.6); color: #fff; font-size: 12px;
+  padding: 6px 13px; border-radius: 999px; backdrop-filter: blur(6px);
+}
+.skill-card .body { padding: 20px 22px 24px; }
+.skill-card h3 { font-size: 20px; margin-bottom: 8px; }
+.skill-card p { color: var(--muted); font-size: 13.5px; }
+.skill-card .tools { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+.skill-card .tools span { font-size: 12px; background: var(--card); padding: 6px 12px; border-radius: 8px; color: var(--muted); }
+
+.skill-dots { display: flex; justify-content: center; gap: 8px; margin-top: 22px; }
+.skill-dots button {
+  width: 7px; height: 7px; border-radius: 50%; border: none; padding: 0;
+  background: var(--line); cursor: pointer; transition: background 0.2s, transform 0.2s;
+}
+.skill-dots button.active { background: var(--fg); transform: scale(1.3); }
+
+/* ── projects slide ── */
+.projects { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.card { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.card .ph { aspect-ratio: 16/9; border: none; border-radius: 0; border-bottom: 1px solid var(--line); }
+.card .mini-carousel { aspect-ratio: 16/9; border-bottom: 1px solid var(--line); }
+.card .body { padding: 20px; }
+.card .top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.card .type { font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); white-space: nowrap; }
+.card h3 { font-size: 19px; margin-bottom: 8px; }
+.card p { color: var(--muted); font-size: 12.5px; margin-top: 6px; }
+.card .result { margin-top: 10px; font-size: 12px; font-weight: 600; }
+.card .tools { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+.card .tools span { font-size: 11px; background: var(--card); padding: 5px 10px; border-radius: 8px; color: var(--muted); }
+
+/* ── hobbies slide ── */
+.hobby-gallery { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 26px; }
+.hobby-gallery .ph { aspect-ratio: 1/1; max-height: 22vh; }
+.hobby-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+.hobby-list .item h3 { font-size: 15px; margin-bottom: 5px; }
+.hobby-list .item p { color: var(--muted); font-size: 12.5px; }
+
+/* ── contact slide ── */
+.contact-band { background: #0a0a0a; color: #fff; text-align: center; border-top: none; }
+.contact-band .kicker { color: #71717a; }
+.contact-band h2 { font-size: clamp(26px, 4.6vw, 40px); font-weight: 800; letter-spacing: -0.03em; margin-top: 10px; }
+.contact-band p { color: #a1a1aa; margin-top: 12px; }
+.contact-band .cta-row { justify-content: center; margin-top: 24px; }
+.contact-band .cta-row a { border-color: #333; color: #fff; }
+.contact-band .cta-row a.primary { background: #fff; color: #0a0a0a; border-color: #fff; }
+.contact-band .cta-row a:not(.primary):hover { background: #1a1a1a; }
+.contact-band footer { margin-top: 60px; color: #52525b; font-size: 12px; }
+
+/* ── tablet / narrow-desktop: ease the heaviest 2-col grids before full mobile stacking ── */
+@media (max-width: 980px) {
+  .hero-grid, .projects { grid-template-columns: minmax(0, 1fr); }
+  .hero .ph { max-height: 34vh; }
+}
+
+@media (max-width: 720px) {
+  .topnav ul { gap: 14px; }
+  .topnav ul li:not(:last-child) { display: none; }
+  .hero-grid, .traits, .facts, .hobby-list, .projects { grid-template-columns: 1fr; }
+  .slide { padding-top: 72px; padding-bottom: 32px; }
+  .hero .ph { max-height: 26vh; }
+  .skill-card { flex-basis: 84vw; }
+  .skill-card .ph { aspect-ratio: 16/10; }
+  .mini-carousel { aspect-ratio: 16/10; }
+}
