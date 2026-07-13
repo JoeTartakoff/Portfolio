@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>김유종 · Magazine</title>
+  <link rel="stylesheet" href="vendor/page-flip/stPageFlip.css" />
+  <style>
+    :root { --bg: #1b1b1d; --fg: #f5f5f7; --muted: #9a9a9f; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      background: var(--bg); color: var(--fg);
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", sans-serif;
+      display: flex; flex-direction: column; align-items: center;
+      overflow: hidden;
+    }
+    .bar {
+      width: 100%; flex: 0 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 16px; z-index: 10;
+    }
+    .bar a.back { color: var(--fg); text-decoration: none; font-size: 13px; opacity: 0.85; }
+    .bar a.back:hover { opacity: 1; }
+    .bar .right { display: flex; align-items: center; gap: 14px; }
+    .bar .page-count { color: var(--muted); font-size: 12.5px; letter-spacing: 0.04em; }
+    .bar .fs-btn {
+      background: none; border: none; color: var(--fg); opacity: 0.85;
+      cursor: pointer; font-size: 15px; line-height: 1; padding: 4px;
+    }
+    .bar .fs-btn:hover { opacity: 1; }
+
+    .stage {
+      flex: 1 1 auto; width: 100%;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 0; position: relative;
+    }
+    #book { box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55); }
+    #book .stf__item { background: #fff; }
+    #book canvas { display: block; width: 100%; height: 100%; }
+
+    .nav-btn {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      width: 44px; height: 44px; border-radius: 50%; border: none;
+      background: rgba(255, 255, 255, 0.08); color: var(--fg);
+      font-size: 18px; cursor: pointer; z-index: 5;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    .nav-btn:hover { background: rgba(255, 255, 255, 0.18); }
+    .nav-btn.prev { left: 18px; }
+    .nav-btn.next { right: 18px; }
+    .nav-btn[disabled] { opacity: 0.25; cursor: default; pointer-events: none; }
+
+    .loading {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 12px; color: var(--muted); font-size: 13px;
+    }
+    .spinner {
+      width: 26px; height: 26px; border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.15); border-top-color: var(--fg);
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading.hidden { display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="bar">
+    <a href="index.html#projects" class="back">← 포트폴리오로 돌아가기</a>
+    <div class="right">
+      <span class="page-count" id="pageCount"></span>
+      <button class="fs-btn" id="fsBtn" aria-label="전체화면">⛶</button>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="loading" id="loading"><div class="spinner"></div><span>매거진 불러오는 중…</span></div>
+    <button class="nav-btn prev" id="prevBtn" aria-label="이전 페이지">‹</button>
+    <div id="book"></div>
+    <button class="nav-btn next" id="nextBtn" aria-label="다음 페이지">›</button>
+  </div>
+
+  <script src="vendor/pdfjs/pdf.min.js"></script>
+  <script src="vendor/page-flip/page-flip.browser.js"></script>
+  <script src="magazine.js?v=6"></script>
+</body>
+</html>
