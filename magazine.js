@@ -125,12 +125,124 @@ async function init() {
 
     pageFlip.loadFromImages(images);
 
+    // The canvas renderer paints the whole book white every frame, which shows
+    // an empty page beside a lone cover. Clear to transparent instead.
+    const render = pageFlip.getRender();
+    render.clear = function () {
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    };
+
+    // Flipping to or from a lone page, page-flip uses that same page as both the
+    // flipping page and the page beneath it, so the area the fold uncovers keeps
+    // showing the old spread (a white page). Clear that area to the background,
+    // and fade out the page on the far side so no white edge is left around the
+    // lone page as it lands.
+    const flipController = pageFlip.getFlipController();
+    let lonePageFlip = false;
+    const origDrawFrame = render.drawFrame;
+    render.drawFrame = function () {
+      const bottom = this.bottomPage;
+      const calc = flipController.calc;
+      if (bottom == null || bottom !== this.flippingPage || !calc) return origDrawFrame.call(this);
+
+      const ctx = this.ctx;
+      const farKey = this.getDirection() === 1 ? "rightPage" : "leftPage";
+      const far = this[farKey];
+      const progress = Math.min(calc.getFlippingProgress() / 100, 1);
+      if (far) {
+        this[farKey] = {
+          simpleDraw: (side) => {
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, Math.min(1, (1 - progress) * 2));
+            far.simpleDraw(side);
+            ctx.restore();
+          },
+        };
+      }
+      this.bottomPage = {
+        draw: () => {
+          const rect = this.getRect();
+          ctx.save();
+          ctx.beginPath();
+          for (const p of calc.getBottomClipArea()) {
+            if (p === null) continue;
+            const g = this.convertToGlobal(p);
+            ctx.lineTo(g.x, g.y);
+          }
+          ctx.clip();
+          ctx.clearRect(rect.left, rect.top, rect.width, rect.height);
+          ctx.restore();
+        },
+      };
+      lonePageFlip = true;
+      try {
+        origDrawFrame.call(this);
+      } finally {
+        lonePageFlip = false;
+        this.bottomPage = bottom;
+        this[farKey] = far;
+      }
+    };
+
+    // No spine shadow beside a lone page, or while flipping to or from one.
+    const origDrawBookShadow = render.drawBookShadow;
+    render.drawBookShadow = function () {
+      if (lonePageFlip || this.leftPage == null || this.rightPage == null) return;
+      return origDrawBookShadow.call(this);
+    };
+
+    // The outer shadow of a flipping page falls on the page beneath it. Flipping
+    // to or from a lone page there is no page beneath, so it would paint a dark
+    // rectangle onto the empty background.
+    const origDrawOuterShadow = render.drawOuterShadow;
+    render.drawOuterShadow = function () {
+      if (lonePageFlip) return;
+      return origDrawOuterShadow.call(this);
+    };
+
     const total = images.length;
+
+    // In landscape a lone page sits in one half of the book. Slide the book by
+    // half a page so it is centered: the front cover (right half) moves left,
+    // a lone back cover (left half, only when the page count is even) moves right.
+    const offsetFor = (index) => {
+      if (pageFlip.getOrientation() !== "landscape") return 0;
+      if (index === 0) return -width / 2;
+      if (total % 2 === 0 && index === total - 1) return width / 2;
+      return 0;
+    };
+    const setOffset = (x) => {
+      bookEl.style.transform = `translate3d(${x}px, 0, 0)`;
+    };
+
+    // Start sliding when page-flip commits to turning the page (button, click,
+    // or a released drag past the spine), so the book opens while the page
+    // turns. A drag that springs back calls this with isTurned = false.
+    // Direction 0 = forward, 1 = back.
+    const origAnimate = flipController.animateFlippingTo;
+    flipController.animateFlippingTo = function (from, to, isTurned, ...rest) {
+      if (isTurned && this.calc) {
+        const cur = pageFlip.getCurrentPageIndex();
+        const target = this.calc.getDirection() === 0
+          ? (total % 2 === 0 && cur >= total - 3 ? total - 1 : Math.max(cur, 1))
+          : (cur <= 2 ? 0 : Math.min(cur, total - 2));
+        setOffset(offsetFor(target));
+      }
+      return origAnimate.call(this, from, to, isTurned, ...rest);
+    };
+    pageFlip.on("changeState", (e) => {
+      if (e.data === "read") setOffset(offsetFor(pageFlip.getCurrentPageIndex()));
+    });
+
+    setOffset(offsetFor(0));
+    requestAnimationFrame(() => requestAnimationFrame(() => bookEl.classList.add("animated")));
+
     const updateUI = () => {
       const cur = pageFlip.getCurrentPageIndex();
       pageCount.textContent = `${cur + 1} / ${total}`;
       prevBtn.disabled = cur <= 0;
       nextBtn.disabled = cur >= total - 1;
+      setOffset(offsetFor(cur));
     };
 
     pageFlip.on("flip", updateUI);
